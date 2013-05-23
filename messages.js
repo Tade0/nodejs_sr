@@ -2,7 +2,10 @@
 exports.getRouteList = function(routingTable) {
 	var routingMessage = {type: "route_list", routes: []};
 	routingTable.forEach( function(record) {
-		routingMessage.routes.push({ "address": record.socket.remoteAddress, "port": record.listeningPort });
+		if (record.listeningPort != 0)
+		{
+			routingMessage.routes.push({ "address": record.socket.remoteAddress, "port": record.listeningPort });
+		}
 	});
 	return routingMessage;
 }

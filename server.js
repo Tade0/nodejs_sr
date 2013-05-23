@@ -11,29 +11,32 @@ function requestConnection(socket) {
 	if (routingTable.length >= maxRoutes) {
 		return messages.getRouteList(routingTable);
 	}
-	routingTable.push({socket: socket, listeningPort: 8080});
+	routingTable.push({ socket: socket, listeningPort: 0 });
 	return messages.connAckMsg;
 }
 
-server = net.createServer( function(socket) {
-	var message = requestConnection(socket);
-	debugger;
-	socket.write(JSON.stringify(message));
-	
-});
+exports.start = function() {
 
-server.on('listening',function() {
-	console.log('Listening on '+host+':'+port);
-});
+	server = net.createServer( function(socket) {
+		var message = requestConnection(socket);
+		
+		socket.write(JSON.stringify(message));
+		
+	});
 
-server.on('error', function(e) {
-	if (e.code == 'EADDRINUSE') {
-		console.log('Address in use, retrying...');
-		port++;
-		setTimeout(function () {
-		  server.listen(port);
-		}, 100);
-	}
-});
+	server.on('listening',function() {
+		console.log('Listening on '+host+':'+port);
+	});
 
-server.listen(port);
+	server.on('error', function(e) {
+		if (e.code == 'EADDRINUSE') {
+			console.log('Address in use, retrying...');
+			port++;
+			setTimeout(function () {
+			  server.listen(port);
+			}, 100);
+		}
+	});
+
+	server.listen(port);
+}
