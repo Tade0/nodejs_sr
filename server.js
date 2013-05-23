@@ -22,6 +22,35 @@ exports.start = function() {
 		
 		socket.write(JSON.stringify(message));
 		
+		socket.on('data', function(data) {
+			jsonData = JSON.parse(data.toString());
+			
+			console.log(data.toString());
+			
+			switch(jsonData.type)
+			{
+				case 'hi':
+					routingTable.forEach( function(record) {
+						if (record.socket == socket)
+						{
+							record.listeningPort = jsonData.port;
+						}
+					});
+			}
+		});
+		
+		socket.on('error', function() {
+		
+			for (var i=0;i<routingTable.length;i++)
+			{
+				if (routingTable[i].socket == socket)
+				{
+					routingTable.splice(i,1);
+					console.log(i+" disconnected");
+				}
+			}
+		});
+		
 	});
 
 	server.on('listening',function() {
