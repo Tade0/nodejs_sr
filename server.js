@@ -11,7 +11,7 @@ function requestConnection(socket) {
 	if (routingTable.length >= maxRoutes) {
 		return messages.getRouteList(routingTable);
 	}
-	routingTable.push(socket);
+	routingTable.push({socket: socket, listeningPort: 8080});
 	return messages.connAckMsg;
 }
 
@@ -19,6 +19,7 @@ server = net.createServer( function(socket) {
 	var message = requestConnection(socket);
 	debugger;
 	socket.write(JSON.stringify(message));
+	
 });
 
 server.on('listening',function() {

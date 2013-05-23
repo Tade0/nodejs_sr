@@ -1,18 +1,15 @@
 // Komponuje wiadomosc na podstawie podanej tablicy routingu
 exports.getRouteList = function(routingTable) {
 	var routingMessage = {type: "route_list", routes: []};
-	routingTable.forEach( function(sock) {
-		routingMessage.routes.push({ "address": sock.remoteAddress, "port": sock.remotePort });
+	routingTable.forEach( function(record) {
+		routingMessage.routes.push({ "address": record.socket.remoteAddress, "port": record.listeningPort });
 	});
 	return routingMessage;
 }
 // Connection Acknowledgment Message
 exports.connAckMsg = {type: "hello"};
-//exports.myPortMsg = {type: ""};
 
-exports.parseMsg = function(message) {
-	switch(message.type)
-	{
-		case '':
-	}
+exports.getGreetingMsg = function(port) {
+	return {type: "hi", port: port};
 }
+//exports.myPortMsg = {type: ""};
