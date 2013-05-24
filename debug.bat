@@ -1,1 +1,1 @@
-node debug server.js
+node debug main.js
