@@ -28,6 +28,24 @@ function disconnect(socket)
 	}
 }
 
+function processMessage(data)
+{
+	switch(data.type)
+	{
+		case 'hi':
+			routingTable.forEach( function(record) {
+				if (record.socket == socket)
+				{
+					record.listeningPort = data.port;
+				}
+			});
+		break;
+		case 'hello':
+			socket.write(JSON.stringify(messages.getGreetingMsg(port)));
+		break;
+	}
+}
+
 exports.start = function() {
 
 	server = net.createServer( function(socket) {
@@ -37,20 +55,9 @@ exports.start = function() {
 		
 		// 
 		socket.on('data', function(data) {
-			jsonData = JSON.parse(data.toString());
-			
 			console.log(data.toString());
-			
-			switch(jsonData.type)
-			{
-				case 'hi':
-					routingTable.forEach( function(record) {
-						if (record.socket == socket)
-						{
-							record.listeningPort = jsonData.port;
-						}
-					});
-			}
+			data = JSON.parse(data.toString());
+			processMessage(data);
 		});
 		
 		// Rozłączenie
