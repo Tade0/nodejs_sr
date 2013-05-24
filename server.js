@@ -15,6 +15,19 @@ function requestConnection(socket) {
 	return messages.connAckMsg;
 }
 
+function disconnect(socket)
+{
+	var sockets = routingTable.map( function(item) {
+		return item.socket;
+	});
+	var i = sockets.indexOf(socket);
+	if (i != -1)
+	{
+		routingTable.splice(i,1);
+		console.log(i+" disconnected");
+	}
+}
+
 exports.start = function() {
 
 	server = net.createServer( function(socket) {
@@ -22,6 +35,7 @@ exports.start = function() {
 		
 		socket.write(JSON.stringify(message));
 		
+		// 
 		socket.on('data', function(data) {
 			jsonData = JSON.parse(data.toString());
 			
@@ -39,16 +53,9 @@ exports.start = function() {
 			}
 		});
 		
+		// Rozłączenie
 		socket.on('error', function() {
-		
-			for (var i=0;i<routingTable.length;i++)
-			{
-				if (routingTable[i].socket == socket)
-				{
-					routingTable.splice(i,1);
-					console.log(i+" disconnected");
-				}
-			}
+			disconnect(socket);
 		});
 		
 	});
