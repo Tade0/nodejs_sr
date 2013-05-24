@@ -18,7 +18,7 @@ for (var i = 0;i <args.length; i++)
 			break;
 			case 'connect':
 				exports.connectAddr = (args[i+1]+"").search("^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}$") != 1 ? args[i+1] : '0.0.0.0';
-				exports.connectPort = (args[i+1]+"").search("^\\d+&") != 1 ? args[i+1] : 8080;
+				exports.connectPort = (args[i+2]+"").search("^\\d+&") != 1 ? args[i+2] : 8080;
 				exports.connect = true;
 			break;
 		}
