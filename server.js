@@ -5,7 +5,9 @@ var cli = require('./cli.js');
 var host = '127.0.0.1';
 var port = cli.portNum;
 var routingTable = [];
-var maxRoutes = 2;
+var maxRoutes = 3;
+
+var client = new net.Socket();
 
 function requestConnection(socket) {
 	if (routingTable.length >= maxRoutes) {
@@ -15,8 +17,7 @@ function requestConnection(socket) {
 	return messages.connAckMsg;
 }
 
-function disconnect(socket)
-{
+function disconnect(socket) {
 	var sockets = routingTable.map( function(item) {
 		return item.socket;
 	});
@@ -28,20 +29,19 @@ function disconnect(socket)
 	}
 }
 
-function processMessage(data)
-{
+function processMessage(data) {
 	switch(data.type)
 	{
 		case 'hi':
 			routingTable.forEach( function(record) {
-				if (record.socket == socket)
+				if (record.socket == data.socket)
 				{
 					record.listeningPort = data.port;
 				}
 			});
 		break;
 		case 'hello':
-			socket.write(JSON.stringify(messages.getGreetingMsg(port)));
+			client.write(JSON.stringify(messages.getGreetingMsg(port)));
 		break;
 	}
 }
@@ -57,6 +57,7 @@ exports.start = function() {
 		socket.on('data', function(data) {
 			console.log(data.toString());
 			data = JSON.parse(data.toString());
+			data.socket = socket;
 			processMessage(data);
 		});
 		
@@ -82,4 +83,22 @@ exports.start = function() {
 	});
 
 	server.listen(port);
+}
+
+exports.startClient = function() {
+	debugger;
+	if (cli.connect)
+	{
+		client.connect(cli.connectPort,cli.connectAddr, function() {
+			console.log("Connected");
+		});
+		client.on('data', function(data) {
+			console.log(data.toString());
+			data = JSON.parse(data.toString());
+			processMessage(data);
+		});
+		client.on('error', function(e) {
+			console.log(e.code);
+		});
+	}
 }
