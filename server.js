@@ -1,5 +1,5 @@
 var net = require('net');
-var messages = require('./messages.js');
+var msg = require('./messages.js');
 var cli = require('./cli.js');
 
 var host = '127.0.0.1';
@@ -11,10 +11,10 @@ var client = new net.Socket();
 
 function requestConnection(socket) {
 	if (routingTable.length >= maxRoutes) {
-		return messages.getRouteList(routingTable);
+		return msg.getRouteList(routingTable);
 	}
 	routingTable.push({ socket: socket, listeningPort: 0 });
-	return messages.connAckMsg;
+	return msg.connAckMsg;
 }
 
 function disconnect(socket) {
@@ -32,7 +32,7 @@ function disconnect(socket) {
 function processMessage(data) {
 	switch(data.type)
 	{
-		case 'hi':
+		case msg.HI:
 			routingTable.forEach( function(record) {
 				if (record.socket == data.socket)
 				{
@@ -40,8 +40,11 @@ function processMessage(data) {
 				}
 			});
 		break;
-		case 'hello':
-			client.write(JSON.stringify(messages.getGreetingMsg(port)));
+		case msg.HELLO:
+			client.write(JSON.stringify(msg.getGreetingMsg(port)));
+		break;
+		case msg.ROUTE_LIST:
+			
 		break;
 	}
 }
