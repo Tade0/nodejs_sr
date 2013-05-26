@@ -1,0 +1,18 @@
+@startuml
+participant A
+participant B
+entity B.routingTable
+A -> B : connect
+alt sukces
+B -> A : hello
+B -> B.routingTable : Zapisz adres A
+A -> B : hi
+B -> B.routingTable : Zapisz port, na którym\n nasłuchuje A
+
+else routingTable pełna
+B.routingTable -> B : zwróć całą tabelę
+B -> A : routingTable
+
+
+end
+@enduml
