@@ -88,6 +88,7 @@ exports.start = function() {
 
 	server.on('listening',function() {
 		console.log('Listening on '+host+':'+port);
+		startClient();
 	});
 
 	server.on('error', function(e) {
@@ -96,14 +97,14 @@ exports.start = function() {
 			port++;
 			setTimeout(function () {
 			  server.listen(port);
-			}, 100);
+			}, 200);
 		}
 	});
 
 	server.listen(port);
 }
 
-exports.startClient = function() {
+function startClient() {
 	if (cli.connect)
 	{
 		client.connect(cli.connectPort,cli.connectAddr, function() {
@@ -117,11 +118,25 @@ exports.startClient = function() {
 		client.on('error', function(e) {
 			console.log(e.code);
 		});
+		client.on('end', function() {
+			eventEmitter.emit('reconnect');
+		});
 	}
 }
 
 eventEmitter.on('routing', function() {
-	console.log('routing');
+	if (this.table.length > 0)
+	{
+		console.log('routing');
+		client.end();
+	}
+	else
+	{
+		console.log('routing table empty');
+	}
+});
+
+eventEmitter.on('reconnect', function() {
 	if (this.table.length > 0)
 	{
 		var row = this.table.pop();
