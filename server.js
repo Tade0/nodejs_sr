@@ -1,13 +1,27 @@
 var net = require('net');
 var msg = require('./messages.js');
 var cli = require('./cli.js');
+var events = require('events');
 
 var host = '127.0.0.1';
 var port = cli.portNum;
 var routingTable = [];
-var maxRoutes = 3;
+var maxRoutes = 2;
 
 var client = new net.Socket();
+
+var EventManager = function() {
+	this.table = [];
+	this.addRoutes = function(routes) {
+		var temp = [];
+		temp = this.table.concat(routes);
+		this.table = temp;
+	};
+};
+
+EventManager.prototype = new events.EventEmitter;
+
+var eventEmitter = new EventManager();
 
 function requestConnection(socket) {
 	if (routingTable.length >= maxRoutes) {
@@ -44,7 +58,8 @@ function processMessage(data) {
 			client.write(JSON.stringify(msg.getGreetingMsg(port)));
 		break;
 		case msg.ROUTE_LIST:
-			
+			eventEmitter.addRoutes(data.routes);
+			eventEmitter.emit('routing');
 		break;
 	}
 }
@@ -89,7 +104,6 @@ exports.start = function() {
 }
 
 exports.startClient = function() {
-	debugger;
 	if (cli.connect)
 	{
 		client.connect(cli.connectPort,cli.connectAddr, function() {
@@ -105,3 +119,13 @@ exports.startClient = function() {
 		});
 	}
 }
+
+eventEmitter.on('routing', function() {
+	console.log('routing');
+	if (this.table.length > 0)
+	{
+		var row = this.table.pop();
+		console.log(row.address+':'+row.port);
+		client.connect(row.port,row.address);
+	}
+});
