@@ -2,16 +2,16 @@ var net = require('net');
 var msg = require('./messages.js');
 var cli = require('./cli.js');
 var helper = require('./helper.js');
-var mng = require('./managers.js');
-var events = require('events');
+var event = require('./event.js');
+var connection = require('./connection.js');
 
 var host = '127.0.0.1';
 var port = cli.portNum;
 var routingTable = [];
 var maxRoutes = 2;
 
-var eventEmitter = new mng.EventManager();
-var client = new mng.ClientSocket();
+var eventEmitter = new event.EventManager();
+var client = new connection.ClientSocket();
 
 function requestConnection(socket) {
 	if (routingTable.length >= maxRoutes) {
@@ -59,7 +59,7 @@ function processMessage(data) {
 	}
 }
 
-mng.processMessage = processMessage;
+connection.processMessage = processMessage;
 
 exports.start = function() {
 
