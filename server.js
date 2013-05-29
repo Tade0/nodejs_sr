@@ -1,6 +1,7 @@
 var net = require('net');
 var msg = require('./messages.js');
 var cli = require('./cli.js');
+var helper = require('./helper.js');
 var events = require('events');
 
 var host = '127.0.0.1';
@@ -11,6 +12,7 @@ var maxRoutes = 2;
 var client = new net.Socket();
 
 var EventManager = function() {
+	events.EventEmitter.call(this);
 	this.table = [];
 	this.addRoutes = function(routes) {
 		var temp = [];
@@ -20,6 +22,7 @@ var EventManager = function() {
 };
 
 EventManager.prototype = new events.EventEmitter;
+EventManager.prototype.constructor = EventManager;
 
 var eventEmitter = new EventManager();
 
@@ -28,7 +31,12 @@ function requestConnection(socket) {
 		return msg.getRouteList(routingTable);
 	}
 	routingTable.push({ socket: socket, listeningPort: 0 });
-	return msg.connAckMsg;
+	if (routingTable.length > 0)
+	{
+		var item = routingTable[Math.floor(Math.random()*(routingTable.length-1))];
+		msg.getConnAckMsg(item.socket.remoteAddress, item.listeningPort);
+	}
+	return msg.getConnAckMsg();
 }
 
 function disconnect(socket) {

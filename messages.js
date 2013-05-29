@@ -14,7 +14,16 @@ exports.getRouteList = function(routingTable) {
 	return routingMessage;
 }
 // Connection Acknowledgment Message
-exports.connAckMsg = {type: exports.HELLO};
+exports.getConnAckMsg = function(address,port) {
+	if (typeof(address) != 'undefined' && typeof(port) != 'undefined')
+	{
+		return {type: exports.HELLO, address: address, port: port};
+	}
+	else
+	{
+		return {type: exports.HELLO}
+	}
+};
 
 exports.getGreetingMsg = function(port) {
 	return {type: exports.HI, port: port};
