@@ -2,25 +2,13 @@ var net = require('net');
 var msg = require('./messages.js');
 var cli = require('./cli.js');
 var helper = require('./helper.js');
+var mng = require('./managers.js');
 var events = require('events');
 
 var host = '127.0.0.1';
 var port = cli.portNum;
 var routingTable = [];
 var maxRoutes = 2;
-
-var EventManager = function() {
-	events.EventEmitter.call(this);
-	this.table = [];
-	this.addRoutes = function(routes) {
-		var temp = [];
-		temp = this.table.concat(routes);
-		this.table = temp;
-	};
-};
-
-EventManager.prototype = new events.EventEmitter;
-EventManager.prototype.constructor = EventManager;
 
 var ClientSocket = function () {
 	net.Socket.call(this);
@@ -41,7 +29,7 @@ var ClientSocket = function () {
 ClientSocket.prototype = new net.Socket();
 ClientSocket.prototype.constructor = ClientSocket;
 
-var eventEmitter = new EventManager();
+var eventEmitter = new mng.EventManager();
 var client = new ClientSocket();
 
 function requestConnection(socket) {
