@@ -9,8 +9,6 @@ var port = cli.portNum;
 var routingTable = [];
 var maxRoutes = 2;
 
-var client = new net.Socket();
-
 var EventManager = function() {
 	events.EventEmitter.call(this);
 	this.table = [];
@@ -24,7 +22,27 @@ var EventManager = function() {
 EventManager.prototype = new events.EventEmitter;
 EventManager.prototype.constructor = EventManager;
 
+var ClientSocket = function () {
+	net.Socket.call(this);
+	this.on('data', function(data) {
+		console.log(data.toString());
+		data = JSON.parse(data.toString());
+		processMessage(data);
+	});
+	this.on('error', function(e) {
+		console.log(e.code);
+		eventEmitter.emit('reconnect');
+	});
+	this.on('end', function() {
+		eventEmitter.emit('reconnect');
+	});
+};
+
+ClientSocket.prototype = new net.Socket();
+ClientSocket.prototype.constructor = ClientSocket;
+
 var eventEmitter = new EventManager();
+var client = new ClientSocket();
 
 function requestConnection(socket) {
 	if (routingTable.length >= maxRoutes) {
@@ -117,17 +135,6 @@ function startClient() {
 	{
 		client.connect(cli.connectPort,cli.connectAddr, function() {
 			console.log("Connected");
-		});
-		client.on('data', function(data) {
-			console.log(data.toString());
-			data = JSON.parse(data.toString());
-			processMessage(data);
-		});
-		client.on('error', function(e) {
-			console.log(e.code);
-		});
-		client.on('end', function() {
-			eventEmitter.emit('reconnect');
 		});
 	}
 }
