@@ -10,27 +10,8 @@ var port = cli.portNum;
 var routingTable = [];
 var maxRoutes = 2;
 
-var ClientSocket = function () {
-	net.Socket.call(this);
-	this.on('data', function(data) {
-		console.log(data.toString());
-		data = JSON.parse(data.toString());
-		processMessage(data);
-	});
-	this.on('error', function(e) {
-		console.log(e.code);
-		eventEmitter.emit('reconnect');
-	});
-	this.on('end', function() {
-		eventEmitter.emit('reconnect');
-	});
-};
-
-ClientSocket.prototype = new net.Socket();
-ClientSocket.prototype.constructor = ClientSocket;
-
 var eventEmitter = new mng.EventManager();
-var client = new ClientSocket();
+var client = new mng.ClientSocket();
 
 function requestConnection(socket) {
 	if (routingTable.length >= maxRoutes) {
@@ -77,6 +58,8 @@ function processMessage(data) {
 		break;
 	}
 }
+
+mng.processMessage = processMessage;
 
 exports.start = function() {
 
