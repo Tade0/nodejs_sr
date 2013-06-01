@@ -21,29 +21,17 @@ exports.EventManager.prototype.constructor = exports.EventManager;
 //Singleton
 exports.eventManager = new exports.EventManager();
 
-exports.eventManager.on('routing', function() {
-	if (this.table.length > 0)
-	{
-		console.log('routing');
-		this.emit('reconnect');
-	}
-	else
-	{
-		console.log('routing table empty');
-	}
-});
-
 exports.eventManager.on('reconnect', function() {
 	if (this.table.length > 0)
 	{
 		var row = this.table.shift();
 		
 		var visited = this.visited;
-		for (var i=0;i<visited.length;i++)
+		for (var i=visited.length-1;i>=0;i--)
 		{
 			if (visited[i].address == row.address && visited[i].port == row.port)
 			{
-				console.log('visited');
+				console.log('visited '+i);
 				this.emit('reconnect');
 				return;
 			}

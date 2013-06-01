@@ -61,7 +61,7 @@ function processMessage(data) {
 			eventEmitter.addRoutes(data.routes);
 			eventEmitter.addVisited(data.socket.remoteAddress,data.socket.remotePort);
 			debugger;
-			eventEmitter.emit('routing');
+			eventEmitter.emit('reconnect');
 		break;
 	}
 }
@@ -100,7 +100,7 @@ exports.start = function() {
 			port++;
 			setTimeout(function () {
 			  server.listen(port);
-			}, 200);
+			}, 100);
 		}
 	});
 
