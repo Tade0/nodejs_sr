@@ -13,7 +13,7 @@ var port = cli.portNum;
 
 
 eventEmitter = event.eventManager;
-var client = connection.clientManager;
+client = connection.clientManager;
 
 function requestConnection(socket) {
 	if (routingTable.length >= maxRoutes) {
@@ -115,36 +115,3 @@ function startClient() {
 		});
 	}
 }
-
-eventEmitter.on('routing', function() {
-	if (this.table.length > 0)
-	{
-		console.log('routing');
-		eventEmitter.emit('reconnect');
-	}
-	else
-	{
-		console.log('routing table empty');
-	}
-});
-
-eventEmitter.on('reconnect', function() {
-	if (this.table.length > 0)
-	{
-		var row = this.table.shift();
-		
-		var visited = this.visited;
-		for (var i=0;i<visited.length;i++)
-		{
-			if (visited[i].address == row.address && visited[i].port == row.port)
-			{
-				console.log('visited');
-				this.emit('reconnect');
-				return;
-			}
-		}
-		
-		console.log('reconnecting: '+row.address+':'+row.port);
-		client.connect(row.port,row.address);
-	}
-});
