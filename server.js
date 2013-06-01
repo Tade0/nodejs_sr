@@ -77,7 +77,7 @@ exports.start = function() {
 		socket.write(JSON.stringify(message));
 		
 		socket.on('data', function(data) {
-			console.log(data.toString());
+			console.log('\x1b[37;1mdata from: '+this.remoteAddress+':'+this.remotePort+' \x1b[0m'+data.toString());
 			data = JSON.parse(data.toString());
 			data.socket = this;
 			processMessage(data);
@@ -97,7 +97,7 @@ exports.start = function() {
 
 	server.on('error', function(e) {
 		if (e.code == 'EADDRINUSE') {
-			console.log('Address in use, retrying...\x1b[0m');
+			console.log('\x1b[33;1mAddress in use, retrying...\x1b[0m');
 			port++;
 			setTimeout(function () {
 			  server.listen(port);
@@ -112,7 +112,7 @@ function startClient() {
 	if (cli.connect)
 	{
 		client.connect(cli.connectPort,cli.connectAddr, function(port,address) {
-			console.log("Connected to "+address+':'+port);
+			console.log('\x1b[32mConnected to '+address+':'+port+'\x1b[0m');
 		});
 	}
 }

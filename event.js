@@ -38,6 +38,6 @@ exports.eventManager.on('reconnect', function() {
 		}
 		
 		console.log('reconnecting: '+row.address+':'+row.port);
-		client.connect(row.port,row.address, function(port,address) { console.log("Connected to "+address+':'+port); } );
+		client.connect(row.port,row.address, function(port,address) { console.log('\x1b[32mConnected to '+address+':'+port+'\x1b[0m'); } );
 	}
 });

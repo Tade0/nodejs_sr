@@ -9,7 +9,7 @@ exports.ClientManager = function(maxConnections) {
 		var socket = new net.Socket();
 		
 		socket.on('data', function(data) {
-			console.log('data from: '+this.remoteAddress+':'+this.remotePort+' '+data.toString());
+			console.log('\x1b[37;1mdata from: '+this.remoteAddress+':'+this.remotePort+' \x1b[0m'+data.toString());
 			data = JSON.parse(data.toString());
 			data.socket = this;
 			exports.processMessage(data);
@@ -21,7 +21,7 @@ exports.ClientManager = function(maxConnections) {
 		});
 		
 		socket.on('end', function() {
-			console.log('disconnecting from '+this.remoteAddress_+':'+this.remotePort_);
+			console.log('\x1b[31mdisconnecting from '+this.remoteAddress_+':'+this.remotePort_+'\x1b[0m');
 			exports.disconnect(this);
 		});
 		
