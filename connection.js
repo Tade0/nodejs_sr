@@ -1,59 +1,36 @@
 var net = require('net');
 var events = require('events');
-
-exports.ClientSocket = function () {
-	net.Socket.call(this);
-	this.on('data', function(data) {
-		console.log(data.toString());
-		data = JSON.parse(data.toString());
-		exports.processMessage(data);
-	});
-	this.on('error', function(e) {
-		console.log(e.code);
-		clientManager.freeSocket(this);
-		eventEmitter.emit('reconnect');
-	});
-	this.on('end', function() {
-		clientManager.freeSocket(this);
-		eventEmitter.emit('reconnect');
-	});
-};
-
-exports.ClientSocket.prototype = new net.Socket();
-exports.ClientSocket.prototype.constructor = exports.ClientSocket;
+var msg = require('./messages.js');
 
 exports.ClientManager = function(maxConnections) {
-	var freeSockets = new Array(maxConnections);
-	var occupiedSockets = [];
-	
-	for (var i = 0;i<maxConnections;i++)
-	{
-		freeSockets[i] = new exports.ClientSocket();
-	}
 	
 	this.connect = function(port,address)
 	{
-		if (freeSockets.length > 0)
-		{
-			var socket = freeSockets[Math.floor(Math.random()*freeSockets.length)];
-			socket.connect(port,address, function() {
-				occupySocket(socket); 
-			});
-		}
-		else
-		{
-			console.log('No free sockets.');
-		}
-	}
-	
-	this.occupySocket = function(socket) {
-		occupiedSockets.push(freeSockets.splice(freeSockets.indexOf(socket),1));
-	}
-	
-	this.freeSocket = function(socket) {
-		freeSockets.push(occupiedSockets.splice(occupiedSockets.indexOf(socket),1));
+		var socket = new net.Socket();
+		
+		socket.on('data', function(data) {
+			debugger;
+			console.log(this.remoteAddress+" "+this.remotePort);
+			console.log(data.toString());
+			data = JSON.parse(data.toString());
+			data.socket = this;
+			exports.processMessage(data);
+		});
+		
+		socket.on('error', function(e) {
+			console.log(e.code);
+			exports.disconnect(this);
+		});
+		
+		socket.on('end', function() {
+			exports.disconnect(this);
+		});
+		
+		socket.connect(port,address, function() {
+			routingTable.push({socket: this, listeningPort: this.remotePort});
+		});
 	}
 }
 
 //Singleton
-exports.clientManager = new ClientManager();
+exports.clientManager = new exports.ClientManager(1);

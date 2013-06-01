@@ -1,3 +1,6 @@
+maxRoutes = 3;
+routingTable = [];
+
 var net = require('net');
 var msg = require('./messages.js');
 var cli = require('./cli.js');
@@ -7,11 +10,10 @@ var connection = require('./connection.js');
 
 var host = '127.0.0.1';
 var port = cli.portNum;
-var routingTable = [];
-var maxRoutes = 2;
 
-var eventEmitter = new event.EventManager();
-var client = new connection.ClientSocket();
+
+eventEmitter = event.eventManager;
+var client = connection.clientManager;
 
 function requestConnection(socket) {
 	if (routingTable.length >= maxRoutes) {
@@ -38,6 +40,8 @@ function disconnect(socket) {
 	}
 }
 
+connection.disconnect = disconnect;
+
 function processMessage(data) {
 	switch(data.type)
 	{
@@ -50,7 +54,7 @@ function processMessage(data) {
 			});
 		break;
 		case msg.HELLO:
-			client.write(JSON.stringify(msg.getGreetingMsg(port)));
+			data.socket.write(JSON.stringify(msg.getGreetingMsg(port)));
 		break;
 		case msg.ROUTE_LIST:
 			eventEmitter.addRoutes(data.routes);
@@ -68,11 +72,10 @@ exports.start = function() {
 		
 		socket.write(JSON.stringify(message));
 		
-		// 
 		socket.on('data', function(data) {
 			console.log(data.toString());
 			data = JSON.parse(data.toString());
-			data.socket = socket;
+			data.socket = this;
 			processMessage(data);
 		});
 		
@@ -114,7 +117,7 @@ eventEmitter.on('routing', function() {
 	if (this.table.length > 0)
 	{
 		console.log('routing');
-		client.end();
+		eventEmitter.emit('reconnect');
 	}
 	else
 	{
@@ -123,10 +126,11 @@ eventEmitter.on('routing', function() {
 });
 
 eventEmitter.on('reconnect', function() {
+	
 	if (this.table.length > 0)
 	{
-		var row = this.table.pop();
-		console.log(row.address+':'+row.port);
+		var row = this.table.shift();
+		console.log('reconnecting: '+row.address+':'+row.port);
 		client.connect(row.port,row.address);
 	}
 });
