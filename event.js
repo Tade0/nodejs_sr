@@ -9,6 +9,9 @@ exports.EventManager = function() {
 		temp = this.table.concat(routes);
 		this.table = temp;
 	};
+	this.addVisited = function(address,port) {
+		this.visited.push({address: address, port: port});
+	}
 	
 };
 

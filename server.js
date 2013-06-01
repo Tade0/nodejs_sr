@@ -1,4 +1,4 @@
-maxRoutes = 3;
+maxRoutes = 2;
 routingTable = [];
 
 var net = require('net');
@@ -55,9 +55,12 @@ function processMessage(data) {
 		break;
 		case msg.HELLO:
 			data.socket.write(JSON.stringify(msg.getGreetingMsg(port)));
+			routingTable.push({socket: data.socket, listeningPort: data.socket.remotePort});
 		break;
 		case msg.ROUTE_LIST:
 			eventEmitter.addRoutes(data.routes);
+			eventEmitter.addVisited(data.socket.remoteAddress,data.socket.remotePort);
+			debugger;
 			eventEmitter.emit('routing');
 		break;
 	}
@@ -126,10 +129,21 @@ eventEmitter.on('routing', function() {
 });
 
 eventEmitter.on('reconnect', function() {
-	
 	if (this.table.length > 0)
 	{
 		var row = this.table.shift();
+		
+		var visited = this.visited;
+		for (var i=0;i<visited.length;i++)
+		{
+			if (visited[i].address == row.address && visited[i].port == row.port)
+			{
+				console.log('visited');
+				this.emit('reconnect');
+				return;
+			}
+		}
+		
 		console.log('reconnecting: '+row.address+':'+row.port);
 		client.connect(row.port,row.address);
 	}

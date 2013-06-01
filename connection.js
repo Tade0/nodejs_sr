@@ -9,7 +9,6 @@ exports.ClientManager = function(maxConnections) {
 		var socket = new net.Socket();
 		
 		socket.on('data', function(data) {
-			debugger;
 			console.log(this.remoteAddress+" "+this.remotePort);
 			console.log(data.toString());
 			data = JSON.parse(data.toString());
@@ -27,7 +26,7 @@ exports.ClientManager = function(maxConnections) {
 		});
 		
 		socket.connect(port,address, function() {
-			routingTable.push({socket: this, listeningPort: this.remotePort});
+			
 		});
 	}
 }
