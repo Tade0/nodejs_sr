@@ -61,6 +61,7 @@ function processMessage(data) {
 			eventEmitter.addRoutes(data.routes);
 			eventEmitter.addVisited(data.socket.remoteAddress,data.socket.remotePort);
 			debugger;
+			data.socket.end();
 			eventEmitter.emit('reconnect');
 		break;
 	}
@@ -96,7 +97,7 @@ exports.start = function() {
 
 	server.on('error', function(e) {
 		if (e.code == 'EADDRINUSE') {
-			console.log('Address in use, retrying...');
+			console.log('Address in use, retrying...\x1b[0m');
 			port++;
 			setTimeout(function () {
 			  server.listen(port);
@@ -110,8 +111,8 @@ exports.start = function() {
 function startClient() {
 	if (cli.connect)
 	{
-		client.connect(cli.connectPort,cli.connectAddr, function() {
-			console.log("Connected");
+		client.connect(cli.connectPort,cli.connectAddr, function(port,address) {
+			console.log("Connected to "+address+':'+port);
 		});
 	}
 }

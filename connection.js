@@ -4,13 +4,12 @@ var msg = require('./messages.js');
 
 exports.ClientManager = function(maxConnections) {
 	
-	this.connect = function(port,address)
+	this.connect = function(port,address,callback)
 	{
 		var socket = new net.Socket();
 		
 		socket.on('data', function(data) {
-			console.log(this.remoteAddress+" "+this.remotePort);
-			console.log(data.toString());
+			console.log('data from: '+this.remoteAddress+':'+this.remotePort+' '+data.toString());
 			data = JSON.parse(data.toString());
 			data.socket = this;
 			exports.processMessage(data);
@@ -22,14 +21,20 @@ exports.ClientManager = function(maxConnections) {
 		});
 		
 		socket.on('end', function() {
+			console.log('disconnecting from '+this.remoteAddress_+':'+this.remotePort_);
 			exports.disconnect(this);
 		});
 		
 		socket.connect(port,address, function() {
-			
+			if (typeof callback == "function")
+			{
+				callback(this.remotePort,this.remoteAddress);
+				this.remotePort_ = this.remotePort;
+				this.remoteAddress_ = this.remoteAddress;
+			}
 		});
 	}
 }
 
 //Singleton
-exports.clientManager = new exports.ClientManager(1);
+exports.clientManager = new exports.ClientManager(maxRoutes);

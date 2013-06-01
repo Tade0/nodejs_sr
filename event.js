@@ -31,13 +31,13 @@ exports.eventManager.on('reconnect', function() {
 		{
 			if (visited[i].address == row.address && visited[i].port == row.port)
 			{
-				console.log('visited '+i);
+				console.log('already visited '+visited[i].address+':'+visited[i].port);
 				this.emit('reconnect');
 				return;
 			}
 		}
 		
 		console.log('reconnecting: '+row.address+':'+row.port);
-		client.connect(row.port,row.address);
+		client.connect(row.port,row.address, function(port,address) { console.log("Connected to "+address+':'+port); } );
 	}
 });
