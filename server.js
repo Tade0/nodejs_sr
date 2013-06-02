@@ -1,4 +1,4 @@
-maxRoutes = 2;
+maxRoutes = 3;
 routingTable = [];
 
 var net = require('net');
@@ -7,6 +7,10 @@ var cli = require('./cli.js');
 var helper = require('./helper.js');
 var event = require('./event.js');
 var connection = require('./connection.js');
+
+name = helper.randomBuffer(2);
+
+console.log('My name is: '+JSON.stringify(name));
 
 var host = '127.0.0.1';
 var port = cli.portNum;
@@ -50,19 +54,34 @@ function processMessage(data) {
 				if (record.socket == data.socket)
 				{
 					record.listeningPort = data.port;
+					record.name = data.name;
 				}
 			});
 		break;
 		case msg.HELLO:
 			data.socket.write(JSON.stringify(msg.getGreetingMsg(port)));
-			routingTable.push({socket: data.socket, listeningPort: data.socket.remotePort});
+			routingTable.push({socket: data.socket, listeningPort: data.socket.remotePort, name: data.name});
 		break;
 		case msg.ROUTE_LIST:
 			eventEmitter.addRoutes(data.routes);
 			eventEmitter.addVisited(data.socket.remoteAddress,data.socket.remotePort);
-			debugger;
 			data.socket.end();
 			eventEmitter.emit('reconnect');
+		break;
+		case msg.BROADCAST:
+			if (!data.visited.has(name))
+			{
+				debugger;
+				eventEmitter.emit('payload',data.payload);
+				data.visited.push(name);
+				routingTable.forEach( function(item) {
+					debugger;
+					if (!data.visited.has(item.name))
+					{
+						item.socket.write(JSON.stringify(msg.getBroadcastMsg(data.payload, data.visited,data.id)));
+					}
+				});
+			}
 		break;
 	}
 }
@@ -114,5 +133,8 @@ function startClient() {
 		client.connect(cli.connectPort,cli.connectAddr, function(port,address) {
 			console.log('\x1b[32mConnected to '+address+':'+port+'\x1b[0m');
 		});
+	}
+	if (cli.testBroadcast) {
+		setTimeout( function() { console.log('testing Broadcast'); processMessage(msg.getBroadcastMsg({s:"Trolololo"},[]));}, 2000);
 	}
 }

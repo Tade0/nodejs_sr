@@ -41,3 +41,7 @@ exports.eventManager.on('reconnect', function() {
 		client.connect(row.port,row.address, function(port,address) { console.log('\x1b[32mConnected to '+address+':'+port+'\x1b[0m'); } );
 	}
 });
+
+exports.eventManager.on('payload', function(payload) {
+
+});
