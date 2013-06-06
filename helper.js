@@ -22,14 +22,14 @@ Array.prototype.has = function(object, compFun) {
 	{
 		for (var i=0;i<this.length;i++)
 		{
-			if (object.compare(this[i])) return true;
+			if (object.equals(this[i])) return true;
 		}
 	}
 
 	return false;
 }
 
-function compare(to) {
+function equals(to) {
 	if (this.length != to.length)
 	{
 		return false;
@@ -44,8 +44,8 @@ function compare(to) {
 	return true;	
 }
 
-Buffer.prototype.compare = compare;
-Array.prototype.compare = compare;
+Buffer.prototype.equals = equals;
+Array.prototype.equals = equals;
 
 exports.randomBuffer = function(size) {
 	var result = new Buffer(size);
