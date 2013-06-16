@@ -44,16 +44,34 @@ exports.eventManager.on('reconnect', function() {
 });
 
 exports.eventManager.on('payload', function(data) {
-	if (name.equals(data.payload.to))
+	if (data.payload.to.has(name))
 	{
+		var response = {who: name};
+		if (typeof data.payload.type == "undefined")
+		{
+			response.s = "Replied to you";
+		}
+		switch(data.payload.type)
+		{
+			case "routingTable":
+			response.name = name;
+			response.table = [];
+			routingTable.forEach( function(item) {
+				response.table.push(item.name);
+			});
+			break;
+		}
 		var visited = [];
 		data.visited.forEach( function(item) {
 			visited.push(new Buffer(item));
 		});
-		var msg = messages.getBroadcastMsg({s: "Replied to you", who: name}, visited, true);
+		var msg = messages.getBroadcastMsg(response, visited, true);
 		exports.processMessage(msg);
 	}
 });
 exports.eventManager.on('reply', function(data) {
-	console.log(data.payload.who+" replied with "+data.payload.s);
+	if (typeof data.payload.s != "undefined")
+	{
+		console.log(data.payload.who+" replied with "+data.payload.s);
+	}
 });

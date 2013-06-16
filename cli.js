@@ -7,6 +7,7 @@ exports.connectAddr = '0.0.0.0';
 exports.connectPort = 8080;
 
 exports.testBroadcast = false;
+exports.monitor = false;
 
 for (var i = 0;i <args.length; i++)
 {
@@ -38,7 +39,10 @@ for (var i = 0;i <args.length; i++)
 	switch (args[i])
 	{
 		case 'broadcast':
-				exports.testBroadcast = true;
+			exports.testBroadcast = true;
+		break;
+		case 'monitor':
+			exports.monitor = true;	
 		break;
 	}
 }

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+	</head>
+	<body>
+	<script>
+		window.WebSocket = window.WebSocket || window.MozWebSocket;
+		var connection = new WebSocket('ws://127.0.0.1:1337');
+			
+		connection.onopen = function () {
+			
+		};
+		
+		connection.onerror = function (error) {
+			
+		};
+		
+		connection.onmessage = function (message) {
+			var json = JSON.parse(message.data);
+			
+			if (json == "test")
+			{
+				alert("Test!");
+			}
+			
+		};
+		
+		setInterval(function() {
+			if (connection.readyState !== 1)
+			{
+				//Boom
+			}
+		}, 3000);
+		
+		//connection.send(msg);
+		
+		function test() {
+			connection.send('{"command":"test"}');
+		}
+		
+	</script>
+		<button onclick="test()" >TEST</button>
+	</body>
+</html>

@@ -7,6 +7,8 @@ var cli = require('./cli.js');
 var helper = require('./helper.js');
 var event = require('./event.js');
 var connection = require('./connection.js');
+var monitor = require('./monitor/monitor.js');
+
 
 name = typeof cli.name == "undefined" ? helper.randomBuffer(2) : new Buffer(JSON.parse(cli.name));
 
@@ -18,12 +20,15 @@ var port = cli.portNum;
 
 eventEmitter = event.eventManager;
 client = connection.clientManager;
+monitor.eventEmitter = eventEmitter;
+monitor.init();
 
 function requestConnection(socket) {
 	if (routingTable.length >= maxRoutes) {
 		return msg.getRouteList(routingTable);
 	}
 	routingTable.push({ socket: socket, listeningPort: 0 });
+	eventEmitter.emit('routingTableChange');
 	if (routingTable.length > 0)
 	{
 		var item = routingTable[Math.floor(Math.random()*(routingTable.length-1))];
@@ -40,6 +45,7 @@ function disconnect(socket) {
 	if (i != -1)
 	{
 		routingTable.splice(i,1);
+		eventEmitter.emit('routingTableChange');
 		console.log(i+" disconnected");
 	}
 }
@@ -61,6 +67,7 @@ function processMessage(data) {
 		case msg.HELLO:
 			data.socket.write(JSON.stringify(msg.getGreetingMsg(port)));
 			routingTable.push({socket: data.socket, listeningPort: data.socket.remotePort, name: data.name});
+			eventEmitter.emit('routingTableChange');
 		break;
 		case msg.ROUTE_LIST:
 			eventEmitter.addRoutes(data.routes);
@@ -145,7 +152,7 @@ exports.start = function() {
 			console.log('\x1b[33;1mAddress in use, retrying...\x1b[0m');
 			port++;
 			setTimeout(function () {
-			  server.listen(port);
+				server.listen(port);
 			}, 100);
 		}
 	});
@@ -161,6 +168,6 @@ function startClient() {
 		});
 	}
 	if (cli.testBroadcast) {
-		setTimeout( function() { console.log('testing Broadcast'); processMessage(msg.getBroadcastMsg({s:"Trolololo",to: [0,0]},[]));}, 1500);
+		setTimeout( function() { console.log('testing Broadcast'); processMessage(msg.getBroadcastMsg({s:"Trolololo",to: [[0,0]]},[]));}, 1500);
 	}
 }
