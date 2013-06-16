@@ -1,1 +1,2 @@
-node debug main.js
+node debug main.js %~n1%~x1
+pause

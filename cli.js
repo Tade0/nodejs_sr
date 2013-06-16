@@ -18,6 +18,8 @@ for (var i = 0;i <args.length; i++)
 				exports.portNum = (args[i+1]+"").search("^\\d+&") != 1 ? args[i+1] : 8080;
 				exports.port = (args[i+1]+"").search("^\\d+&") != 1 ? true : false ;
 			break;
+			case 'name':
+				exports.name = args[i+1];
 		}
 	}
 	

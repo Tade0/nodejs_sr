@@ -8,7 +8,7 @@ var helper = require('./helper.js');
 var event = require('./event.js');
 var connection = require('./connection.js');
 
-name = helper.randomBuffer(2);
+name = typeof cli.name == "undefined" ? helper.randomBuffer(2) : new Buffer(JSON.parse(cli.name));
 
 console.log('My name is: '+JSON.stringify(name));
 
@@ -69,24 +69,50 @@ function processMessage(data) {
 			eventEmitter.emit('reconnect');
 		break;
 		case msg.BROADCAST:
-			if (!data.visited.has(name))
+			if (data.visited.has(name) == -1)
 			{
-				debugger;
-				eventEmitter.emit('payload',data.payload);
+				eventEmitter.emit('payload',data);
 				data.visited.push(name);
 				routingTable.forEach( function(item) {
-					debugger;
-					if (!data.visited.has(item.name))
+					if (data.visited.has(item.name) === -1)
 					{
-						item.socket.write(JSON.stringify(msg.getBroadcastMsg(data.payload, data.visited,data.id)));
+						item.socket.write(JSON.stringify(msg.getBroadcastMsg(data.payload, data.visited,false,data.id)));
 					}
 				});
+			}
+		break;
+		case msg.REPLY:
+			var names = routingTable.map( function(item) {
+				return item.name;
+			});
+			if (data.visited.length == 0)
+			{
+				eventEmitter.emit('reply',data);
+				break;
+			}
+			var lastName = data.visited.pop();
+			var i = names.has(lastName);
+			if (i != -1)
+			{
+				routingTable[i].socket.write(JSON.stringify(msg.getBroadcastMsg(data.payload, data.visited,true,data.id)));
+			}
+			else
+			{
+				//TODO: A co jeżeli topologia sieci zdążyła się zmienić?
+				/*else
+				{
+					for(var i=0;i<data.visited.length;i++)
+					{
+						
+					}
+				}*/
 			}
 		break;
 	}
 }
 
 connection.processMessage = processMessage;
+event.processMessage = processMessage;
 
 exports.start = function() {
 
@@ -135,6 +161,6 @@ function startClient() {
 		});
 	}
 	if (cli.testBroadcast) {
-		setTimeout( function() { console.log('testing Broadcast'); processMessage(msg.getBroadcastMsg({s:"Trolololo"},[]));}, 2000);
+		setTimeout( function() { console.log('testing Broadcast'); processMessage(msg.getBroadcastMsg({s:"Trolololo",to: [0,0]},[]));}, 1500);
 	}
 }

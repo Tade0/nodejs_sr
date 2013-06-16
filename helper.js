@@ -15,21 +15,21 @@ Array.prototype.has = function(object, compFun) {
 	{
 		for (var i=0;i<this.length;i++)
 		{
-			if (compFun(this[i],object)) return true;
+			if (compFun(this[i],object)) return i;
 		}
 	}
 	else
 	{
 		for (var i=0;i<this.length;i++)
 		{
-			if (object.equals(this[i])) return true;
+			if (object.equals(this[i])) return i;
 		}
 	}
-
-	return false;
+	return -1;
 }
 
 function equals(to) {
+	if (!to) return false;
 	if (this.length != to.length)
 	{
 		return false;
@@ -41,7 +41,7 @@ function equals(to) {
 			return false;
 		}
 	}
-	return true;	
+	return true;
 }
 
 Buffer.prototype.equals = equals;

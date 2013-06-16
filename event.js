@@ -1,4 +1,5 @@
 var events = require('events');
+var messages = require('./messages.js');
 
 exports.EventManager = function() {
 	events.EventEmitter.call(this);
@@ -42,6 +43,17 @@ exports.eventManager.on('reconnect', function() {
 	}
 });
 
-exports.eventManager.on('payload', function(payload) {
-
+exports.eventManager.on('payload', function(data) {
+	if (name.equals(data.payload.to))
+	{
+		var visited = [];
+		data.visited.forEach( function(item) {
+			visited.push(new Buffer(item));
+		});
+		var msg = messages.getBroadcastMsg({s: "Replied to you", who: name}, visited, true);
+		exports.processMessage(msg);
+	}
+});
+exports.eventManager.on('reply', function(data) {
+	console.log(data.payload.who+" replied with "+data.payload.s);
 });

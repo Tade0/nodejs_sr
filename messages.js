@@ -2,6 +2,7 @@ exports.HELLO = "hello";
 exports.HI = "hi";
 exports.ROUTE_LIST = "routeList";
 exports.BROADCAST = "broadcast";
+exports.REPLY = "reply";
 
 // Komponuje wiadomosc na podstawie podanej tablicy routingu
 exports.getRouteList = function(routingTable) {
@@ -26,12 +27,16 @@ exports.getConnAckMsg = function(address,port) {
 	}
 };
 
-exports.getBroadcastMsg = function(payload, visited, id) {
+exports.getBroadcastMsg = function(payload, visited, reply, id ) {
 	if (typeof id == 'undefined')
 	{
 		id = Math.floor(Math.random()*Math.pow(2,31));
 	}
-	return {type: exports.BROADCAST, payload: payload, visited: visited, id: id };
+	if (typeof reply == 'undefined')
+	{
+		reply = false;
+	}
+	return {type: reply ? exports.REPLY : exports.BROADCAST, payload: payload, visited: visited, id: id };
 }
 
 exports.getGreetingMsg = function(port) {
