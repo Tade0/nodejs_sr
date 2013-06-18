@@ -10,9 +10,22 @@ exports.ClientManager = function(maxConnections) {
 		
 		socket.on('data', function(data) {
 			console.log('\x1b[37;1mdata from: '+this.remoteAddress+':'+this.remotePort+' \x1b[0m'+data.toString());
-			data = JSON.parse(data.toString());
+			var dataText = data.toString();
+			var json,data;
+			if ( dataText.search("}{") > -1 )
+			{
+				while ( ( frameBreak = dataText.search("}{") ) > -1 )
+				{
+					json = dataText.substr(0,frameBreak+1);
+					dataText = dataText.substr(frameBreak+1);
+					data = JSON.parse(dataText);
+					data.socket = this;
+					exports.eventEmitter.emit('processMessage',data);
+				}
+			}
+			data = JSON.parse(dataText);
 			data.socket = this;
-			exports.processMessage(data);
+			exports.eventEmitter.emit('processMessage',data);
 		});
 		
 		socket.on('error', function(e) {

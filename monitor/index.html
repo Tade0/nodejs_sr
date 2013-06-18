@@ -7,6 +7,11 @@
 	<script>
 		window.WebSocket = window.WebSocket || window.MozWebSocket;
 		var connection = new WebSocket('ws://127.0.0.1:1337');
+		var out;
+		
+		window.onload = function() {
+			out = document.getElementById("out");
+		};
 			
 		connection.onopen = function () {
 			
@@ -18,10 +23,16 @@
 		
 		connection.onmessage = function (message) {
 			var json = JSON.parse(message.data);
-			
 			if (json == "test")
 			{
 				alert("Test!");
+			}
+			
+			switch(json.type)
+			{
+				case "routingTable":
+					console.log(json.name);
+				break;
 			}
 			
 		};
@@ -39,7 +50,14 @@
 			connection.send('{"command":"test"}');
 		}
 		
+		function getAllNames() {
+			connection.send('{"command":"getAll"}');
+		}
+		
 	</script>
 		<button onclick="test()" >TEST</button>
+		<button onclick="getAllNames()" >Wszyscy</button>
+		<br/>
+		<div id="out" ></div>
 	</body>
 </html>

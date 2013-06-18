@@ -3,6 +3,7 @@ exports.HI = "hi";
 exports.ROUTE_LIST = "routeList";
 exports.BROADCAST = "broadcast";
 exports.REPLY = "reply";
+exports.ROUTING_TABLE = "routingTable";
 
 // Komponuje wiadomosc na podstawie podanej tablicy routingu
 exports.getRouteList = function(routingTable) {
@@ -36,10 +37,21 @@ exports.getBroadcastMsg = function(payload, visited, reply, id ) {
 	{
 		reply = false;
 	}
+	if (typeof visited == 'undefined')
+	{
+		visited = [];
+	}
 	return {type: reply ? exports.REPLY : exports.BROADCAST, payload: payload, visited: visited, id: id };
 }
 
 exports.getGreetingMsg = function(port) {
 	return {type: exports.HI, port: port, name: name};
 }
-//exports.myPortMsg = {type: ""};
+
+exports.getRoutingTableMsg = function(to) {
+	if (typeof to == "undefined")
+	{
+		to = [];
+	}
+	return exports.getBroadcastMsg({type: exports.ROUTING_TABLE, to: to},[]);
+}

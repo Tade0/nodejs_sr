@@ -44,7 +44,7 @@ exports.eventManager.on('reconnect', function() {
 });
 
 exports.eventManager.on('payload', function(data) {
-	if (data.payload.to.has(name))
+	if (data.payload.to.has(name) !== -1 || data.payload.to.length == 0)
 	{
 		var response = {who: name};
 		if (typeof data.payload.type == "undefined")
@@ -53,20 +53,21 @@ exports.eventManager.on('payload', function(data) {
 		}
 		switch(data.payload.type)
 		{
-			case "routingTable":
-			response.name = name;
-			response.table = [];
-			routingTable.forEach( function(item) {
-				response.table.push(item.name);
-			});
+			case messages.ROUTING_TABLE:
+				response.type = messages.ROUTING_TABLE;
+				response.name = name;
+				response.table = [];
+				routingTable.forEach( function(item) {
+					response.table.push(item.name);
+				});
 			break;
 		}
 		var visited = [];
 		data.visited.forEach( function(item) {
 			visited.push(new Buffer(item));
 		});
-		var msg = messages.getBroadcastMsg(response, visited, true);
-		exports.processMessage(msg);
+		var msg = messages.getBroadcastMsg(response, visited, true); //Reply
+		this.emit('processMessage',msg);
 	}
 });
 exports.eventManager.on('reply', function(data) {

@@ -20,6 +20,7 @@ var port = cli.portNum;
 
 eventEmitter = event.eventManager;
 client = connection.clientManager;
+connection.eventEmitter = eventEmitter;
 monitor.eventEmitter = eventEmitter;
 monitor.init();
 
@@ -52,7 +53,7 @@ function disconnect(socket) {
 
 connection.disconnect = disconnect;
 
-function processMessage(data) {
+eventEmitter.on('processMessage', function(data) {
 	switch(data.type)
 	{
 		case msg.HI:
@@ -116,10 +117,7 @@ function processMessage(data) {
 			}
 		break;
 	}
-}
-
-connection.processMessage = processMessage;
-event.processMessage = processMessage;
+});
 
 exports.start = function() {
 
@@ -130,9 +128,22 @@ exports.start = function() {
 		
 		socket.on('data', function(data) {
 			console.log('\x1b[37;1mdata from: '+this.remoteAddress+':'+this.remotePort+' \x1b[0m'+data.toString());
-			data = JSON.parse(data.toString());
+			var dataText = data.toString();
+			var json,data;
+			if ( dataText.search("}{") > -1 )
+			{
+				while ( ( frameBreak = dataText.search("}{") ) > -1 )
+				{
+					json = dataText.substr(0,frameBreak+1);
+					dataText = dataText.substr(frameBreak+1);
+					data = JSON.parse(dataText);
+					data.socket = this;
+					eventEmitter.emit('processMessage',data);
+				}
+			}
+			data = JSON.parse(dataText);
 			data.socket = this;
-			processMessage(data);
+			eventEmitter.emit('processMessage',data);
 		});
 		
 		// Rozłączenie
@@ -168,6 +179,6 @@ function startClient() {
 		});
 	}
 	if (cli.testBroadcast) {
-		setTimeout( function() { console.log('testing Broadcast'); processMessage(msg.getBroadcastMsg({s:"Trolololo",to: [[0,0]]},[]));}, 1500);
+		setTimeout( function() { console.log('testing Broadcast'); eventEmitter.emit('processMessage',msg.getBroadcastMsg({s:"Trolololo",to: []},[])); }, 1500);
 	}
 }
