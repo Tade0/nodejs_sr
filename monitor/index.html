@@ -8,9 +8,11 @@
 		window.WebSocket = window.WebSocket || window.MozWebSocket;
 		var connection = new WebSocket('ws://127.0.0.1:1337');
 		var out;
+		var connections = [];
 		
 		window.onload = function() {
 			out = document.getElementById("out");
+			graph = document.getElementById("graph");
 		};
 			
 		connection.onopen = function () {
@@ -32,6 +34,7 @@
 			{
 				case "routingTable":
 					console.log(json.name);
+					connections.push(new Name({name: json.name, table: json.table}));
 				break;
 			}
 			
@@ -51,10 +54,88 @@
 		}
 		
 		function getAllNames() {
+			connections = [];
 			connection.send('{"command":"getAll"}');
+			setTimeout(displayConnectionGraph,500);
 		}
 		
+		function displayConnectionGraph() {
+			var connectionMap = [];
+			for (var i=0;i<connections.length;i++)
+			{
+				connectionMap[i] = [];
+				for (var j=0;j<connections.length;j++)
+				{
+					if (connections[j].indexInArray(connections[i].table) > -1)
+					{
+						connectionMap[i].push(j);
+					}
+				}
+			}
+			
+			var context = graph.getContext("2d");
+			context.font = "bold 16px sans-serif";
+			context.textAlign = "center";
+			context.textBaseline = "middle";
+			context.strokeStyle = "#ccc";
+			context.clearRect(0,0,500,500);
+			for (var i=0;i<connectionMap.length;i++)
+			{
+				var pos = getPos(i);
+				connectionMap[i].forEach( function(item) {
+					context.beginPath();
+					context.moveTo(250+pos.x*100,250-pos.y*100);
+					var iPos = getPos(item);
+					context.lineTo(250+iPos.x*100,250-iPos.y*100);
+					context.stroke();
+				});
+			}
+			for (var i=0;i<connectionMap.length;i++)
+			{
+				var pos = getPos(i);
+				context.fillText(connections[i].name+"",250+pos.x*100,250-pos.y*100);
+			}
+			
+		}
+		
+		function getPos(index) {
+			var res = {};
+			res.x = Math.sin(index*Math.PI*0.5 + Math.PI*0.33*Math.floor(index/4) )*Math.sqrt(1+Math.floor(index/4));
+			res.y = Math.cos(index*Math.PI*0.5 + Math.PI*0.33*Math.floor(index/4) )*Math.sqrt(1+Math.floor(index/4));
+			return res;
+		}
+		
+		Name = function(params) {
+			this.name = params.name;
+			this.table = params.table;
+			this.indexInArray = function(array) {
+				for(var i=0;i<array.length;i++)
+				{
+					if (this.nameEquals(array[i])) return i;
+				}
+				return -1;
+			}
+			this.nameEquals = function(name) {
+				if (this.name.length != name.length)
+				{
+					return false;
+				}
+				var equals = true;
+				for (var i=0;i<name.length;i++)
+				{
+					if (this.name[i] != name[i])
+					{
+						equals = false;
+						break;
+					}
+				}
+				return equals;
+			}
+		};
+		
 	</script>
+		<canvas id="graph" width=500 height=500 ></canvas>
+		<br/>
 		<button onclick="test()" >TEST</button>
 		<button onclick="getAllNames()" >Wszyscy</button>
 		<br/>
