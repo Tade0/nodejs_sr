@@ -18,7 +18,7 @@ exports.ClientManager = function(maxConnections) {
 				{
 					json = dataText.substr(0,frameBreak+1);
 					dataText = dataText.substr(frameBreak+1);
-					data = JSON.parse(dataText);
+					data = JSON.parse(json);
 					data.socket = this;
 					exports.eventEmitter.emit('processMessage',data);
 				}

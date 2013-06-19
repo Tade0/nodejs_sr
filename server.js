@@ -136,7 +136,7 @@ exports.start = function() {
 				{
 					json = dataText.substr(0,frameBreak+1);
 					dataText = dataText.substr(frameBreak+1);
-					data = JSON.parse(dataText);
+					data = JSON.parse(json);
 					data.socket = this;
 					eventEmitter.emit('processMessage',data);
 				}
