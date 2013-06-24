@@ -1,4 +1,4 @@
-maxRoutes = 3;
+maxRoutes = 4;
 routingTable = [];
 
 var net = require('net');
@@ -64,6 +64,7 @@ eventEmitter.on('processMessage', function(data) {
 					record.name = data.name;
 				}
 			});
+			//data.socket.write(JSON.stringify(msg.getBroadcastMsg( msg.getRouteList(routingTable), [], true ) ));
 		break;
 		case msg.HELLO:
 			data.socket.write(JSON.stringify(msg.getGreetingMsg(port)));
@@ -116,7 +117,44 @@ eventEmitter.on('processMessage', function(data) {
 				}*/
 			}
 		break;
+		case msg.NOTE:
+			eventEmitter.emit('payload',data);
+		break;
 	}
+});
+
+eventEmitter.on('disconnect', function() {
+	eventEmitter.clear();
+	eventEmitter.addVisited("",0,name);
+	routingTable.forEach( function(item) {
+		eventEmitter.addVisited("",0,item.name);
+	});
+});
+
+eventEmitter.on('redundancy', function(routes) {
+	if (typeof routes == "undefined")
+	{
+		eventEmitter.clear();
+		eventEmitter.addVisited("",0,name);
+		routingTable.forEach( function(item) {
+			eventEmitter.addVisited("",0,item.name);
+			item.socket.write( JSON.stringify( msg.getNoteMsg( {type: msg.ROUTE_LIST, to: []} ) ) );
+		});
+	}
+	else
+	{
+		eventEmitter.addRoutes(routes);
+		eventEmitter.emit('reconnect');
+	}
+	
+});
+
+eventEmitter.on('routingTableChange', function(routes) {
+	if (routingTable.length <= 1)
+	{
+		eventEmitter.emit('redundancy');
+	}
+	
 });
 
 exports.start = function() {

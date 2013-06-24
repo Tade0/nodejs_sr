@@ -4,6 +4,7 @@ exports.ROUTE_LIST = "routeList";
 exports.BROADCAST = "broadcast";
 exports.REPLY = "reply";
 exports.ROUTING_TABLE = "routingTable";
+exports.NOTE = "note";
 
 // Komponuje wiadomosc na podstawie podanej tablicy routingu
 exports.getRouteList = function(routingTable) {
@@ -11,7 +12,7 @@ exports.getRouteList = function(routingTable) {
 	routingTable.forEach( function(record) {
 		if (record.listeningPort != 0)
 		{
-			routingMessage.routes.push({ "address": record.socket.remoteAddress, "port": record.listeningPort });
+			routingMessage.routes.push({ "address": record.socket.remoteAddress, "port": record.listeningPort, "name": record.name });
 		}
 	});
 	return routingMessage;
@@ -54,4 +55,8 @@ exports.getRoutingTableMsg = function(to) {
 		to = [];
 	}
 	return exports.getBroadcastMsg({type: exports.ROUTING_TABLE, to: to},[]);
+}
+
+exports.getNoteMsg = function(payload) {
+	return {type: exports.NOTE, payload: payload, visited: [name]};
 }

@@ -4,8 +4,7 @@ var msg = require('./messages.js');
 
 exports.ClientManager = function(maxConnections) {
 	
-	this.connect = function(port,address,callback)
-	{
+	this.connect = function(port,address,callback) {
 		var socket = new net.Socket();
 		
 		socket.on('data', function(data) {
