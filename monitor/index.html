@@ -34,7 +34,11 @@
 			{
 				case "routingTable":
 					console.log(json.name);
-					connections.push(new Name({name: json.name, table: json.table}));
+					var name = new Name({name: json.name, table: json.table});
+					if (name.indexInArray(connections.map( function(item) { return item.name; } ) ) == -1)
+					{
+						connections.push(name);
+					}
 				break;
 			}
 			
@@ -100,8 +104,8 @@
 		
 		function getPos(index) {
 			var res = {};
-			res.x = Math.sin(index*Math.PI*0.5 + Math.PI*0.33*Math.floor(index/4) )*Math.sqrt(1+Math.floor(index/4));
-			res.y = Math.cos(index*Math.PI*0.5 + Math.PI*0.33*Math.floor(index/4) )*Math.sqrt(1+Math.floor(index/4));
+			res.x = Math.sin(index*Math.PI*0.5 + Math.PI*0.25*Math.floor(index/4) )*(1+Math.floor(index/4));
+			res.y = Math.cos(index*Math.PI*0.5 + Math.PI*0.25*Math.floor(index/4) )*(1+Math.floor(index/4));
 			return res;
 		}
 		
