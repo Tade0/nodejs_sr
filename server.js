@@ -30,6 +30,7 @@ chatClient.init();
 
 clock = new vectorTime.Clock();
 chatClient.clock = clock;
+event.clock = clock;
 clock.tick(name,0);
 
 function requestConnection(socket) {

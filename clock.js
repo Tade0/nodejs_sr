@@ -18,6 +18,7 @@ exports.Clock = function() {
 		if (typeof vector[name] == "undefined")
 		{
 			vector[name] = time;
+			return {type: exports.OK, time: vector[name]};
 		}
 		else
 		{

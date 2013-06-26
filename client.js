@@ -26,14 +26,14 @@ server.on('listening',function() {
 
 	// WebSocket server
 	wsServer.on('request', function(request) {
-		if (connection)
+		/*if (connection)
 		{
 			setTimeout( function() { if (connection) request.reject(); },200);
 		}
 		else
-		{
+		{*/
 			connection = request.accept(null, request.origin);
-		}
+		//}
 
 		connection.on('message', function(message) {
 			if (message.type === 'utf8') {
@@ -45,10 +45,9 @@ server.on('listening',function() {
 						response = "test";
 					break;
 					case "post":
-						debugger;
 						exports.eventEmitter.emit('processMessage',
 						messages.getBroadcastMsg(messages.getPostMsg(
-							{text: msg.text, topic: "", time: exports.clock.tick(name).time, name: name }
+							{text: msg.text, topic: "", time: exports.clock.getTime(name)+1, name: name }
 						), [], false));
 						
 					break;
@@ -74,9 +73,10 @@ server.on('listening',function() {
 exports.init = function() {
 
 	exports.eventEmitter.on('chat', function(data) {
+		console.log('chat');
 		if (connection)
 		{
-			connection.send(data);
+			connection.send(JSON.stringify(data));
 		}
 	});
 }

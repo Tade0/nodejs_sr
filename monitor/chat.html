@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<style>
+			* { font-family: Calibri }
+			.container { margin: auto; width: 920px; }
+			#out { height: 300px; overflow-y:scroll; border: 1px solid #ccc; border-radius: 3px; }
+			#text { width: 800px; }
+			.red { color: red; }
+			.green { color: green; }
+		</style>
+	</head>
+	<body>
+	<script>
+		window.WebSocket = window.WebSocket || window.MozWebSocket;
+		var connection = false;
+		var out, text, diag, ipaddr, port;
+		
+		window.onload = function() {
+			out = document.getElementById("out");
+			text = document.getElementById("text");
+			diag = document.getElementById("diag");
+			ipaddr = document.getElementById("ipaddr");
+			port = document.getElementById("port");
+		};
+		function connectTo(address,port) {
+		connection = new WebSocket('ws://'+address+':'+port);
+			
+		connection.onopen = function () {
+			diag.innerHTML = "<span class='green'>połączenie aktywne</span>";
+		};
+		
+		connection.onerror = function (error) {
+			diag.innerHTML = "<span class='red'>połączenie nieaktywne</span>";
+			connection = false;
+		};
+		
+		connection.onmessage = function (message) {
+			try {
+			var json = JSON.parse(message.data);
+			} catch(e) {
+				console.log(message.data);
+			}
+			if (json == "test")
+			{
+				alert("Test!");
+			}
+			if (json.type)
+			{
+				switch (json.type)
+				{
+					case "post":
+						out.innerHTML = out.innerHTML+""+json.name+": "+json.text+"<br/>";
+					break;
+				}
+			}
+		};
+		
+		var interval = setInterval(function() {
+			if (connection.readyState !== 1)
+			{
+				diag.innerHTML = "<span class='red'>połączenie nieaktywne</span>";
+				clearInterval(interval);
+				connection = false;
+				//Boom
+			}
+		}, 3000);
+		
+		}
+		
+		function test() {
+			connection.send('{"command":"test"}');
+		}
+		
+		function send() {
+			if (connection) connection.send('{"command":"post", "text": "'+text.value+'" }');
+		}
+		
+		function connect() {
+			connectTo(ipaddr.value,port.value);
+		}
+	</script>
+		<div class="container" >
+			<div id="out"></div>
+			<input id="text" />
+			<button onclick="send()" >Wyślij</button><br/>
+			Adres: <input id="ipaddr" value="127.0.0.1" /> Port: <input id="port" value="30000" />
+			<button onclick="connect()" >Połącz</button>
+			<div id="diag" ></div>
+		</div>
+	</body>
+</html>

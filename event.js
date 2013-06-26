@@ -1,5 +1,6 @@
 var events = require('events');
 var messages = require('./messages.js');
+var clock = require('./clock.js');
 
 exports.EventManager = function() {
 	events.EventEmitter.call(this);
@@ -67,6 +68,19 @@ exports.eventManager.on('payload', function(data) {
 			break;
 			case messages.ROUTE_LIST:
 				response = messages.getRouteList(routingTable);
+			break;
+			case messages.POST:
+				debugger;
+				var tick = exports.clock.tick(data.payload.name,data.payload.time);
+				while (tick.type == clock.FUTURE)
+				{
+					tick = exports.clock.tick(data.payload.name);
+				}
+				if (tick.type == clock.OK)
+				{
+					this.emit('chat',data.payload);
+				}
+				response = undefined;
 			break;
 		}
 		var visited = [];

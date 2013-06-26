@@ -6,6 +6,7 @@ exports.REPLY = "reply";
 exports.ROUTING_TABLE = "routingTable";
 exports.NOTE = "note";
 exports.POST = "post";
+exports.NONE = "none";
 
 // Komponuje wiadomosc na podstawie podanej tablicy routingu
 exports.getRouteList = function(routingTable) {
@@ -31,6 +32,10 @@ exports.getConnAckMsg = function(address,port) {
 };
 
 exports.getBroadcastMsg = function(payload, visited, reply, id ) {
+	if (typeof payload == 'undefined')
+	{
+		return {type: exports.NONE};
+	}
 	if (typeof id == 'undefined')
 	{
 		id = Math.floor(Math.random()*Math.pow(2,31));
