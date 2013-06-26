@@ -8,6 +8,8 @@ var helper = require('./helper.js');
 var event = require('./event.js');
 var connection = require('./connection.js');
 var monitor = require('./monitor/monitor.js');
+var chatClient = require('./client.js');
+var vectorTime = require('./clock.js');
 
 
 name = typeof cli.name == "undefined" ? helper.randomBuffer(2) : new Buffer(JSON.parse(cli.name));
@@ -22,7 +24,13 @@ eventEmitter = event.eventManager;
 client = connection.clientManager;
 connection.eventEmitter = eventEmitter;
 monitor.eventEmitter = eventEmitter;
+chatClient.eventEmitter = eventEmitter;
 monitor.init();
+chatClient.init();
+
+clock = new vectorTime.Clock();
+chatClient.clock = clock;
+clock.tick(name,0);
 
 function requestConnection(socket) {
 	if (routingTable.length >= maxRoutes) {
@@ -64,7 +72,6 @@ eventEmitter.on('processMessage', function(data) {
 					record.name = data.name;
 				}
 			});
-			//data.socket.write(JSON.stringify(msg.getBroadcastMsg( msg.getRouteList(routingTable), [], true ) ));
 		break;
 		case msg.HELLO:
 			data.socket.write(JSON.stringify(msg.getGreetingMsg(port)));
@@ -81,7 +88,7 @@ eventEmitter.on('processMessage', function(data) {
 			if (data.visited.has(name) == -1)
 			{
 				eventEmitter.emit('payload',data);
-				data.visited.push(name);
+				data.visited.push(name);				
 				routingTable.forEach( function(item) {
 					if (data.visited.has(item.name) === -1)
 					{

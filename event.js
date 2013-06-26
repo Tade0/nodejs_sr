@@ -48,7 +48,7 @@ exports.eventManager.on('reconnect', function() {
 	}
 });
 exports.eventManager.on('payload', function(data) {
-	if (data.payload.to.has(name) !== -1 || data.payload.to.length == 0)
+	if (typeof data.payload.to == "undefined" || data.payload.to.has(name) !== -1 || data.payload.to.length == 0)
 	{
 		var response = {who: name};
 		if (typeof data.payload.type == "undefined")

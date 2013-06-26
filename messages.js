@@ -5,6 +5,7 @@ exports.BROADCAST = "broadcast";
 exports.REPLY = "reply";
 exports.ROUTING_TABLE = "routingTable";
 exports.NOTE = "note";
+exports.POST = "post";
 
 // Komponuje wiadomosc na podstawie podanej tablicy routingu
 exports.getRouteList = function(routingTable) {
@@ -16,7 +17,7 @@ exports.getRouteList = function(routingTable) {
 		}
 	});
 	return routingMessage;
-}
+};
 // Connection Acknowledgment Message
 exports.getConnAckMsg = function(address,port) {
 	if (typeof(address) != 'undefined' && typeof(port) != 'undefined')
@@ -43,11 +44,11 @@ exports.getBroadcastMsg = function(payload, visited, reply, id ) {
 		visited = [];
 	}
 	return {type: reply ? exports.REPLY : exports.BROADCAST, payload: payload, visited: visited, id: id };
-}
+};
 
 exports.getGreetingMsg = function(port) {
 	return {type: exports.HI, port: port, name: name};
-}
+};
 
 exports.getRoutingTableMsg = function(to) {
 	if (typeof to == "undefined")
@@ -55,8 +56,12 @@ exports.getRoutingTableMsg = function(to) {
 		to = [];
 	}
 	return exports.getBroadcastMsg({type: exports.ROUTING_TABLE, to: to},[]);
-}
+};
 
 exports.getNoteMsg = function(payload) {
 	return {type: exports.NOTE, payload: payload, visited: [name]};
-}
+};
+
+exports.getPostMsg = function(data) {
+	return {type: exports.POST, text: data.text ? data.text : "", topic: data.topic ? data.topic : "", name: data.name, time: data.time };
+};

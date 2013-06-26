@@ -11,6 +11,10 @@ exports.Clock = function() {
 			name = new Buffer(name);
 		}
 		name = name.toString('base64');
+		if (typeof time == "undefined")
+		{
+			time = vector[name]+1;
+		}
 		if (typeof vector[name] == "undefined")
 		{
 			vector[name] = time;
